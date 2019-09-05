@@ -4,17 +4,39 @@
 */
 
 const entryPoint = document.querySelector(".cards");
-const followersArray = ["gsc229", "mdegregori1", "rrrbba", "crsullivan"];
-followersArray.forEach(item => {
-  axios
-    .get(`https://api.github.com/users/${item}`)
+//const followersArray = ["gsc229", "mdegregori1", "rrrbba", "crsullivan"];
+//followersArray.forEach(item => {});
+axios
+  .get(`https://api.github.com/users/gsc229/followers`)
 
-    .then(response => {
-      console.log(response.data);
+  .then(response1 => {
+    const followersArray = [];
+    const followersData = response1.data;
+    followersData.forEach(item1 => {
+      followersArray.push(item1.login);
+    });
+    console.log(followersArray);
+    followersArray.forEach(item2 => {
+      axios
+        .get(`https://api.github.com/users/${item2}`)
+        .then(response2 => {
+          console.log(response2);
+          const userData = response2.data;
+          entryPoint.appendChild(UserCard(userData));
+        })
+        .catch(error2 => {
+          console.log("The data was not returned", error2);
+        });
+    });
+  })
+  .catch(error1 => {
+    console.log("The data was not returned", error1);
+  });
+/*  .then(response => {
+      console.log(response);
       const userData = response.data;
       entryPoint.appendChild(UserCard(userData));
-    });
-});
+    }) */
 
 /* Step 2: Inspect and study the data coming back, this is YOUR 
    github info! You will need to understand the structure of this 
@@ -80,19 +102,23 @@ function UserCard(obj) {
   cardInfo.appendChild(userName);
   cardInfo.appendChild(location);
   cardInfo.appendChild(profile);
+  cardInfo.appendChild(profileLink);
   cardInfo.appendChild(followers);
   cardInfo.appendChild(following);
   cardInfo.appendChild(bio);
-  profile.appendChild(profileLink);
 
   // reference the object for element contents:
   userImage.src = obj.avatar_url;
   name.textContent = obj.name;
   userName.textContent = obj.login;
   location.textContent = obj.location;
+  profile.innerHTML = `Profile: `;
+
+  profileLink.textContent = `"${obj.html_url}"`;
   profileLink.href = obj.html_url;
-  followers.textContent = obj.followers;
-  following.textContent = obj.following;
+  followers.textContent = `Followers: ${obj.followers}`;
+  following.textContent = `Following: ${obj.following}`;
+  bio.textContent = obj.bio;
 
   return card;
 }
